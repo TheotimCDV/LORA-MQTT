@@ -1,0 +1,163 @@
+[
+    {
+        "id": "e2dbc21dd8e66fa3",
+        "type": "tab",
+        "label": "Flux 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "influx-config",
+        "type": "influxdb",
+        "hostname": "influxdb",
+        "port": "8086",
+        "protocol": "http",
+        "database": "MyBucket",
+        "name": "influxdb",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://influxdb:8086",
+        "timeout": "",
+        "rejectUnauthorized": false
+    },
+    {
+        "id": "1172db1693af81c0",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "host.docker.internal",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "e82f0e89dec34495",
+        "type": "json",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 690,
+        "y": 200,
+        "wires": [
+            [
+                "da51b9542db79247"
+            ]
+        ]
+    },
+    {
+        "id": "f11d732b430ee563",
+        "type": "influxdb out",
+        "z": "e2dbc21dd8e66fa3",
+        "influxdb": "influx-config",
+        "name": "InfluxDB Write",
+        "measurement": "test",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "MyOrg",
+        "bucket": "MyBucket",
+        "x": 1160,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d4603bed7ec61aa9",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "Debug Simulation",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 850,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "d38c771352e3b0b2",
+        "type": "mqtt in",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "Température (MQTT)",
+        "topic": "capteur/temp",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "1172db1693af81c0",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 400,
+        "y": 440,
+        "wires": [
+            [
+                "e82f0e89dec34495",
+                "d4603bed7ec61aa9"
+            ]
+        ]
+    },
+    {
+        "id": "da51b9542db79247",
+        "type": "function",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "function 2",
+        "func": "msg.payload = [\n    {\n        measurement: \"capteurs\",\n        fields: {\n            temperature: msg.payload.temperature,\n            humidity: msg.payload.humidity\n        }\n    }\n];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 200,
+        "wires": [
+            [
+                "f11d732b430ee563",
+                "cd18b20d28181c05"
+            ]
+        ]
+    },
+    {
+        "id": "cd18b20d28181c05",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 280,
+        "wires": []
+    }
+]
