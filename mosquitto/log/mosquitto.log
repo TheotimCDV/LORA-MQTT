@@ -110,3 +110,17 @@
 1750443515: Client dht11_sensor_client_local disconnected.
 1750443517: New connection from 172.25.0.1:39308 on port 1883.
 1750443517: New client connected from 172.25.0.1:39308 as dht11_sensor_client_local (p2, c1, k0).
+1751399422: mosquitto version 2.0.21 starting
+1751399422: Config loaded from /mosquitto/config/mosquitto.conf.
+1751399422: Opening ipv4 listen socket on port 1883.
+1751399422: Opening ipv6 listen socket on port 1883.
+1751399422: Opening websockets listen socket on port 9001.
+1751399422: mosquitto version 2.0.21 running
+1751399955: mosquitto version 2.0.21 terminating
+1751399955: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751399961: mosquitto version 2.0.21 starting
+1751399961: Config loaded from /mosquitto/config/mosquitto.conf.
+1751399961: Opening ipv4 listen socket on port 1883.
+1751399961: Opening ipv6 listen socket on port 1883.
+1751399961: Opening websockets listen socket on port 9001.
+1751399961: mosquitto version 2.0.21 running

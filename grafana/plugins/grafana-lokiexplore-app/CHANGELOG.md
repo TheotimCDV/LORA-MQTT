@@ -1,5 +1,40 @@
 # Changelog
 
+#### 1.0.20
+
+##### Chores
+
+* **gha:**  update ci to deploy ops with new argo workflows (#1349) (250c5444)
+
+##### New Features
+
+* **EmbeddedLogs:**  embedded logs url parameter namespace (#1353) (11340a2c)
+
+
+#### 1.0.19
+
+##### Chores
+
+*  add bundle-types workflow (#1327) (ef3bc6df)
+
+##### New Features
+
+* **FieldsBreakdown:**  Show panels with errors (#1346) (7d0f70bc)
+* **FieldValues:**  add better max series limit error message (#1345) (7f1df4cd)
+
+##### Bug Fixes
+
+* **datasources:**  default datasources (#1348) (b0842eab)
+
+##### Refactors
+
+* **changelog:**  manually fix changelog (#1342) (63333a8e)
+
+##### Tests
+
+*  hopeful flake fix (21c05825)
+
+
 #### 1.0.18
 
 ##### Chores
