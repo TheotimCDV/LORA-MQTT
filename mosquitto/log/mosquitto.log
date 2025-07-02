@@ -124,3 +124,48 @@
 1751399961: Opening ipv6 listen socket on port 1883.
 1751399961: Opening websockets listen socket on port 9001.
 1751399961: mosquitto version 2.0.21 running
+1751401762: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751403563: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751411930: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751413731: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751414369: mosquitto version 2.0.21 terminating
+1751414369: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751471297: mosquitto version 2.0.21 starting
+1751471297: Config loaded from /mosquitto/config/mosquitto.conf.
+1751471297: Opening ipv4 listen socket on port 1883.
+1751471297: Opening ipv6 listen socket on port 1883.
+1751471297: Opening websockets listen socket on port 9001.
+1751471297: mosquitto version 2.0.21 running
+1751472185: New connection from 172.21.0.1:47270 on port 1883.
+1751472185: New client connected from 172.21.0.1:47270 as dht11_sensor_client_local (p2, c1, k0).
+1751472665: New connection from 172.21.0.1:39574 on port 1883.
+1751472665: New client connected from 172.21.0.1:39574 as auto-EBAEBAD0-3171-B6C2-519A-0BCCF86F9F9D (p2, c1, k60).
+1751472665: Client auto-EBAEBAD0-3171-B6C2-519A-0BCCF86F9F9D disconnected.
+1751472879: Client dht11_sensor_client_local disconnected.
+1751472906: New connection from 172.21.0.1:43906 on port 1883.
+1751472906: New client connected from 172.21.0.1:43906 as dht11_sensor_client_local (p2, c1, k0).
+1751472909: New connection from 172.21.0.1:43920 on port 1883.
+1751472909: New client connected from 172.21.0.1:43920 as auto-8EFCD2FD-001F-9EEC-A1C9-7001C9F1D64F (p2, c1, k60).
+1751472909: Client auto-8EFCD2FD-001F-9EEC-A1C9-7001C9F1D64F disconnected.
+1751472928: New connection from 172.21.0.1:36688 on port 1883.
+1751472928: New client connected from 172.21.0.1:36688 as auto-7C319F7D-7A05-9F66-290D-8987E1D2E3E4 (p2, c1, k60).
+1751472928: Client auto-7C319F7D-7A05-9F66-290D-8987E1D2E3E4 disconnected.
+1751473098: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751473127: New connection from 172.21.0.1:51916 on port 1883.
+1751473127: Client <unknown> closed its connection.
+1751473317: Client dht11_sensor_client_local disconnected.
+1751473349: New connection from 172.21.0.1:57248 on port 1883.
+1751473349: New client connected from 172.21.0.1:57248 as dht11_sensor_client_local (p2, c1, k0).
+1751473669: New connection from 172.21.0.1:35252 on port 1883.
+1751473669: New client connected from 172.21.0.1:35252 as nodered_481cc97ac2783b17 (p2, c1, k60).
+1751473831: New connection from 172.21.0.1:44794 on port 1883.
+1751473832: Client dht11_sensor_client_local already connected, closing old connection.
+1751473832: New client connected from 172.21.0.1:44794 as dht11_sensor_client_local (p2, c1, k0).
+1751474178: Client dht11_sensor_client_local disconnected.
+1751474403: New connection from 172.21.0.1:40542 on port 1883.
+1751474403: New client connected from 172.21.0.1:40542 as dht11_sensor_client_local (p2, c1, k0).
+1751474899: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1751476002: Client nodered_481cc97ac2783b17 closed its connection.
+1751476002: Client dht11_sensor_client_local disconnected: No error information.
+1751476667: mosquitto version 2.0.21 terminating
+1751476667: Saving in-memory database to /mosquitto/data//mosquitto.db.

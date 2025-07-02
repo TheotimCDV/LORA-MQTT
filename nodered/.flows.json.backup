@@ -27,7 +27,7 @@
         "type": "mqtt-broker",
         "name": "",
         "broker": "host.docker.internal",
-        "port": 1883,
+        "port": "1883",
         "clientid": "",
         "autoConnect": true,
         "usetls": false,
@@ -75,7 +75,7 @@
         "z": "e2dbc21dd8e66fa3",
         "influxdb": "influx-config",
         "name": "InfluxDB Write",
-        "measurement": "test",
+        "measurement": "LORA",
         "precision": "",
         "retentionPolicy": "",
         "database": "",
@@ -88,25 +88,11 @@
         "wires": []
     },
     {
-        "id": "d4603bed7ec61aa9",
-        "type": "debug",
-        "z": "e2dbc21dd8e66fa3",
-        "name": "Debug Simulation",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "x": 850,
-        "y": 340,
-        "wires": []
-    },
-    {
         "id": "d38c771352e3b0b2",
         "type": "mqtt in",
         "z": "e2dbc21dd8e66fa3",
         "name": "Température (MQTT)",
-        "topic": "capteur/temp",
+        "topic": "capteur/temperature",
         "qos": "0",
         "datatype": "auto-detect",
         "broker": "1172db1693af81c0",
@@ -117,8 +103,8 @@
         "y": 440,
         "wires": [
             [
-                "e82f0e89dec34495",
-                "d4603bed7ec61aa9"
+                "80d24d10ada676a3",
+                "f11d732b430ee563"
             ]
         ]
     },
@@ -138,7 +124,6 @@
         "y": 200,
         "wires": [
             [
-                "f11d732b430ee563",
                 "cd18b20d28181c05"
             ]
         ]
@@ -156,8 +141,25 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 980,
-        "y": 280,
+        "x": 900,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "80d24d10ada676a3",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 460,
         "wires": []
     }
 ]
