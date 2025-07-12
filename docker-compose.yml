@@ -12,6 +12,8 @@ services:
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     restart: unless-stopped
+    networks:
+      - loranet
 
   influxdb:
     image: influxdb:2.7
@@ -28,6 +30,8 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=MyBucket
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-token
     restart: unless-stopped
+    networks:
+      - loranet
 
   grafana:
     image: grafana/grafana-oss
@@ -37,6 +41,8 @@ services:
     volumes:
       - ./grafana:/var/lib/grafana
     restart: unless-stopped
+    networks:
+      - loranet
 
   nodered:
     image: nodered/node-red
@@ -46,3 +52,24 @@ services:
     volumes:
       - ./nodered:/data
     restart: unless-stopped
+    networks:
+      - loranet
+  
+  meshview:
+    build:
+      context: ./meshview
+      dockerfile: docker/Dockerfile
+    container_name: meshview
+    ports:
+      - "8082:8082"  # Port interne = 8081 (défini dans config), externe libre
+    volumes:
+      - ./meshview/sample.config.ini:/app/config.ini
+    restart: unless-stopped
+    networks:
+      - loranet
+
+
+
+networks:
+  loranet:
+    driver: bridge

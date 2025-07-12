@@ -26,7 +26,7 @@
         "id": "1172db1693af81c0",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "192.168.187.236",
+        "broker": "192.168.20.57",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
@@ -54,20 +54,35 @@
         "sessionExpiry": ""
     },
     {
-        "id": "e82f0e89dec34495",
-        "type": "json",
-        "z": "e2dbc21dd8e66fa3",
-        "name": "Parse JSON",
-        "property": "payload",
-        "action": "",
-        "pretty": false,
-        "x": 690,
-        "y": 200,
-        "wires": [
-            [
-                "da51b9542db79247"
-            ]
-        ]
+        "id": "6ab322bfb55deedd",
+        "type": "mqtt-broker",
+        "name": "Meshview",
+        "broker": "192.168.20.57",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
     },
     {
         "id": "f11d732b430ee563",
@@ -75,14 +90,14 @@
         "z": "e2dbc21dd8e66fa3",
         "influxdb": "influx-config",
         "name": "InfluxDB Write",
-        "measurement": "LORA",
+        "measurement": "capteurs",
         "precision": "",
         "retentionPolicy": "",
         "database": "",
         "precisionV18FluxV20": "ms",
         "retentionPolicyV18Flux": "",
         "org": "MyOrg",
-        "bucket": "MyBucket",
+        "bucket": "LORA",
         "x": 1160,
         "y": 220,
         "wires": []
@@ -92,7 +107,7 @@
         "type": "mqtt in",
         "z": "e2dbc21dd8e66fa3",
         "name": "Température (MQTT)",
-        "topic": "capteur/temperature",
+        "topic": "msh/CO/cajica/#",
         "qos": "0",
         "datatype": "auto-detect",
         "broker": "1172db1693af81c0",
@@ -104,46 +119,9 @@
         "wires": [
             [
                 "80d24d10ada676a3",
-                "f11d732b430ee563"
+                "c2ab0278a6451dcc"
             ]
         ]
-    },
-    {
-        "id": "da51b9542db79247",
-        "type": "function",
-        "z": "e2dbc21dd8e66fa3",
-        "name": "function 2",
-        "func": "msg.payload = [\n    {\n        measurement: \"capteurs\",\n        fields: {\n            temperature: msg.payload.temperature,\n            humidity: msg.payload.humidity\n        }\n    }\n];\nreturn msg;\n",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 880,
-        "y": 200,
-        "wires": [
-            [
-                "cd18b20d28181c05"
-            ]
-        ]
-    },
-    {
-        "id": "cd18b20d28181c05",
-        "type": "debug",
-        "z": "e2dbc21dd8e66fa3",
-        "name": "debug 1",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "payload",
-        "targetType": "msg",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 900,
-        "y": 60,
-        "wires": []
     },
     {
         "id": "80d24d10ada676a3",
@@ -160,6 +138,95 @@
         "statusType": "auto",
         "x": 660,
         "y": 460,
+        "wires": []
+    },
+    {
+        "id": "c2ab0278a6451dcc",
+        "type": "json",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 730,
+        "y": 320,
+        "wires": [
+            [
+                "2bb251e5ccc9248c",
+                "64662bfed63f78eb"
+            ]
+        ]
+    },
+    {
+        "id": "64662bfed63f78eb",
+        "type": "function",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "function 1",
+        "func": "let data = (typeof msg.payload === \"string\") ? JSON.parse(msg.payload) : msg.payload;\n\nmsg.payload = [\n    {\n        temperature: parseFloat(data.temperature),\n        humidity: parseFloat(data.humidity),\n        light: parseFloat(data.light)\n    },\n    {\n        device: msg.topic.split(\"/\").pop()\n    }\n];\n\nmsg.measurement = \"capteurs\";\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 940,
+        "y": 300,
+        "wires": [
+            [
+                "2151dda661c4e43b",
+                "f11d732b430ee563",
+                "c0459fc67e62f693"
+            ]
+        ]
+    },
+    {
+        "id": "2bb251e5ccc9248c",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "2151dda661c4e43b",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1260,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "c0459fc67e62f693",
+        "type": "debug",
+        "z": "e2dbc21dd8e66fa3",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "tags",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1300,
+        "y": 500,
         "wires": []
     }
 ]

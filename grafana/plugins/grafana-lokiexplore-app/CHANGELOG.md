@@ -1,5 +1,42 @@
 # Changelog
 
+#### 1.0.22
+
+##### Chores
+
+* **eslint:**  disable sort/object-properties, remove recommendations (#1392) (c7941852)
+*  bump @grafana/create-plugin configuration to 5.25.1 (#1365) (65e6e53d)
+*  whitelist grafana-plugins-platform-bot[bot] (#1383) (ac0f59d7)
+
+##### New Features
+
+*  enable Logs Drilldown link in Metrics Drilldown (#1389) (8fb4422e)
+* **LogsPanel:**  set details mode (#1391) (d1befe8c)
+
+##### Bug Fixes
+
+*  limit patterns to 500 (#1390) (e2abf9a7)
+
+
+#### 1.0.21
+
+##### New Features
+
+* **JSON:**  support labels/metadata filtering in JSON viz (#1370) (2de9c052)
+* **Embbedding:**  open embedding API for default line filters (#1376) (0d866b88)
+* **patterns:**  allow disabling patterns in Logs Drilldown (#1361) (76bd7196)
+*  calculate sparsity on errored/partial data (#1358) (e3bcb5ac)
+
+##### Bug Fixes
+
+* **JSON:**  detected fields not always getting called on activation (#1368) (987874cc)
+*  dont run volume query when collapse (#1363) (f29bc32a)
+
+##### Other Changes
+
+*  Publish each commit to dev + ops, auto-merge dev and ops PRs (#1375) (a25eb8c6)
+
+
 #### 1.0.20
 
 ##### Chores
