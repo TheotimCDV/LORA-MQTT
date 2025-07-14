@@ -54,20 +54,22 @@ services:
     restart: unless-stopped
     networks:
       - loranet
-  
+
   meshview:
     build:
-      context: ./meshview
-      dockerfile: docker/Dockerfile
-    container_name: meshview
-    ports:
-      - "8082:8082"  # Port interne = 8081 (défini dans config), externe libre
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./meshview/sample.config.ini:/app/config.ini
-    restart: unless-stopped
+      - ./config.ini:/app/config.ini
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mosquitto
+      - influxdb
+      - grafana
+      - nodered
     networks:
       - loranet
-
 
 
 networks:
