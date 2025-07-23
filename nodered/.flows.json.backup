@@ -26,7 +26,7 @@
         "id": "1172db1693af81c0",
         "type": "mqtt-broker",
         "name": "",
-        "broker": "192.168.20.57",
+        "broker": "192.168.31.154",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
@@ -162,7 +162,7 @@
         "type": "function",
         "z": "e2dbc21dd8e66fa3",
         "name": "function 1",
-        "func": "let data = (typeof msg.payload === \"string\") ? JSON.parse(msg.payload) : msg.payload;\n\nlet influxPayload = [\n    {\n        measurement: \"capteurs\",\n        tags: {\n            device: msg.topic.split(\"/\").pop()\n        },\n        fields: {\n            temperature: parseFloat(data.temperature),\n            humidity: parseFloat(data.humidity),\n            light: parseFloat(data.light)\n        },\n        timestamp: new Date().toISOString()\n    }\n];\n\n// Message pour InfluxDB\nlet influxMsg = { ...msg };\ninfluxMsg.payload = influxPayload;\n\n// Message pour Meshview\nlet meshMsg = {\n    topic: \"msh/CO/cajica/\" + msg.topic.split(\"/\").pop(),\n    payload: JSON.stringify({\n        from: msg.topic.split(\"/\").pop(),\n        lat: data.lat || 4.918,\n        lon: data.lon || -74.027,\n        temperature: data.temperature,\n        humidity: data.humidity,\n        light: data.light,\n        batteryLevel: data.battery || 3.9,\n        snr: data.snr || 12.5,\n        time: new Date().toISOString()\n    })\n};\n\nreturn [influxMsg, meshMsg]; // Deux sorties\n",
+        "func": "let data = (typeof msg.payload === \"string\") ? JSON.parse(msg.payload) : msg.payload;\n\nmsg.payload = [\n    {\n        temperature: parseFloat(data.temperature),\n        humidity: parseFloat(data.humidity),\n        light: parseFloat(data.light),\n        solar_irradiance: parseFloat(data.solar_irradiance),\n        solar_class: data.solar_class\n    },\n    {\n        device: data.device\n    }\n];\n\nmsg.measurement = \"capteurs\";\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -227,24 +227,6 @@
         "statusType": "auto",
         "x": 1300,
         "y": 500,
-        "wires": []
-    },
-    {
-        "id": "1a50bcbcc03bf31f",
-        "type": "mqtt out",
-        "z": "e2dbc21dd8e66fa3",
-        "name": "Meshview",
-        "topic": "msh/CO/cajica/pico1",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "6ab322bfb55deedd",
-        "x": 1360,
-        "y": 280,
         "wires": []
     }
 ]
