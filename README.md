@@ -161,8 +161,73 @@ Key | What it does | Default
   ```bash
   docker compose exec influxdb influx user password --name admin
 
+Node-RED writes sensor data into the bucket `LORA` under measurement `capteurs` with fields:
+- `temperature` (°C)
+- `humidity` (%)
+- `luminosity_percent` (%)
+- `solar_irradiance` (no unit)
+- `solar_class` (categorical)
 
+Each data point is tagged with the `device` identifier.
 
+---
+## Grafana
+
+**URL:** http://localhost:3000  
+**Admin credentials (from `.env`):**
+- **Username:** `admin`
+- **Password:** `admin123`
+
+> These credentials are read from `.env` via `GRAFANA_USER` and `GRAFANA_PASSWORD` and are applied **only on first startup** when the `./grafana` volume is empty.
+
+### What persists
+Grafana stores its database in `./grafana` (mapped to `/var/lib/grafana`).  
+If this folder already contains `grafana.db`, changing the env variables will **not** change the admin credentials.
+
+### Resetting / changing the admin password
+- Prefer the web UI: **Configuration → Users** (top-left gear icon).
+- Or via CLI inside the container:
+  ```bash
+  docker compose exec grafana grafana-cli admin reset-admin-password <NEW_PASSWORD>
+
+#### What already exists
+A dashboard is already created with panels for:
+- Current temperature and temperature over the last 24 hours  
+- Current humidity and humidity over the last 24 hours  
+- Current solar irradiance and irradiance over the last 24 hours  
+- Solar class (categorical)
+
+These panels are configured but will show *No data* until the datasource is correctly connected to InfluxDB and Node-RED starts writing values.
+
+#### What needs to be done
+1. In Grafana, go to **Configuration → Data sources → Add data source**.  
+2. Select **InfluxDB** and configure:
+   - **URL:** `http://influxdb:8086`
+   - **Query language:** Flux
+   - **Organization:** `MyOrg`
+   - **Bucket:** `LORA`
+   - **Token:** generate one in the InfluxDB UI if none is set in `.env`
+3. Save & test the datasource.  
+4. Edit the dashboard panels if needed and make sure queries reference:
+   - Measurement = `capteurs`
+   - Fields = `temperature`, `humidity`, `solar_irradiance`, `solar_class`
+   - Tag = `device` (add a variable in the dashboard to filter by device).
+
+#### Recommended setup
+- **Temperature:** last value (5m) + average over 24h, thresholds green < 25 °C, orange 25–30 °C, red > 30 °C  
+- **Humidity:** last value + average over 24h, thresholds green 40–60 %  
+- **Solar irradiance / Solar class:** display last values without thresholds  
+- **Device filter:** add a dashboard variable `device` from InfluxDB tags to filter panels per device
+
+---
+
+### Troubleshooting
+- If all panels show **No data**:
+  - Ensure Node-RED is writing to InfluxDB (`bucket=LORA`, `org=MyOrg`).
+  - Verify Grafana datasource points to `http://influxdb:8086` with Flux, correct org, bucket, and token.
+  - Adjust the time range (e.g. “Last 24h” instead of “Last 5m”).
+  - Check container logs if data still doesn’t appear.
+  
 ## Installation & Usage
 
 ```bash
