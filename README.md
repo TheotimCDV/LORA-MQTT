@@ -1,158 +1,181 @@
-# LORA-MQTT
+# UMNG Smart Campus — LoRa MQTT Stack with MeshView
 
+This repository provides a containerized IoT stack for real-time monitoring and visualization of LoRa/MQTT sensor data. The centerpiece is **MeshView**, which displays a live map of Meshtastic nodes alongside complementary services: Mosquitto, Node-RED, InfluxDB, and Grafana.
 
-Sur nodered, changer l'host mqtt en fonction de l'adresse IP de l'hôte sinon pas d'envoie via le broker
+---
 
-Pour connecter les capteurs avec meshview :
+## Architecture
 
+```mermaid
+flowchart LR
+  subgraph Device
+    MCU[LoRa Sensor / Meshtastic Node]
+  end
 
-### 🪜 Étapes
+  MCU -- uplink --> GW((LoRa Gateway / MQTT Publisher))
 
-#### 1. **Configurer le broker MQTT**
+  subgraph Docker Host
+    MOSQ[(Mosquitto MQTT Broker)]
+    NR[Node-RED]
+    IFX[(InfluxDB 2.x)]
+    GRA[Grafana]
+    MV[MeshView Web App]
+  end
 
-Dans `config.ini` de Meshview (section `[mqtt]`), ajoute ton topic personnalisé :
-
-```ini
-topics = ["msh/CO/cajica/#"]
-server = ton.ip.local.serveur  # Exemple: 192.168.1.100
-port = 1883
-username = ton_user
-password = ton_mdp
+  GW -->|MQTT topics| MOSQ
+  MOSQ -->|subscribe| MV
+  MOSQ -->|subscribe| NR
+  NR -->|write| IFX
+  IFX -->|visualize| GRA
 ```
 
 ---
 
-#### 2. **Choisir un topic pour ton capteur**
+## Components
 
-Par convention Meshview, les topics ont cette structure :
+- **Mosquitto** → lightweight MQTT broker for sensor message routing.  
+- **Node-RED** → low-code environment for message parsing and routing to InfluxDB.  
+- **InfluxDB** → time-series database for sensor metrics.  
+- **Grafana** → dashboards for visualization of stored metrics.  
+- **MeshView** → Python web app (default port `8081`) that subscribes to MQTT topics and displays nodes, conversations, graphs, and maps.
 
+---
+
+## MeshView — what it is
+
+**MeshView** is a Python app that:
+- Subscribes to one or more MQTT topics (e.g. Meshtastic frames).
+- Parses packets and stores them in a database (SQLite by default).
+- Serves a web UI (default **port 8081**) with sections like *Nodes*, *Conversations*, *Graphs*, *Stats*, *Net*, *Map*, *Top*.
+- Supports optional TLS for the web server and site branding (title, message, domain).
+
+In this stack, the `Dockerfile` does:
+```dockerfile
+FROM python:3.12-slim
+# ...
+RUN git clone --recurse-submodules https://github.com/pablorevilla-meshtastic/meshview.git .
+# ...
+CMD ["/app/env/bin/python3", "mvrun.py", "--config", "config.ini"]
 ```
-msh/<pays>/<ville>/<identifiant_du_capteur>
-```
-
-**Exemple** : `msh/CO/cajica/meteo01`
+So MeshView runs with the **local** `config.ini` you edit below.
 
 ---
 
-#### 3. **Adapter le code de ton capteur**
+## **Configure MeshView** (`config.ini`)
 
-Voici un exemple complet en MicroPython à adapter sur ton microcontrôleur :
+This file has four sections: `[server]`, `[site]`, `[mqtt]`, `[database]`. The defaults found here are tailored for your sample deployment; adjust to your environment.
 
-```python
-mqtt_host = "192.168.1.100"  # IP de ton serveur MQTT
-mqtt_port = 1883
-mqtt_topic = "msh/CO/cajica/meteo01"
+### 1) `[server]` — web server
+Key | What it does | Recommended value
+---|---|---
+`bind` | Bind address | `"*"` (all interfaces) or `"0.0.0.0"`
+`port` | HTTP port MeshView listens on | `8081` (mapped as `8081:8081` in compose)
+`tls_cert` | Path to PEM certificate (enables HTTPS) | leave empty for HTTP
+`acme_challenge` | Optional ACME challenge directory | leave empty unless terminating TLS here
 
-payload = {
-    "id": "meteo01",
-    "from": "meteo01",
-    "to": "ffffffff",
-    "rx_time": int(time.time()),
-    "rx_rssi": -60,
-    "rx_snr": 7.5,
-    "decoded": {
-        "payload": {
-            "temperature": temp,     # float
-            "humidity": hum          # float
-        }
-    },
-    "position": {
-        "latitude": 5.0261,
-        "longitude": -74.0299,
-        "altitude": 2550
-    }
-}
+> If you terminate TLS at a reverse proxy (recommended), keep `tls_cert` empty and expose MeshView over HTTP internally.
 
-mqtt_client.publish(mqtt_topic, ujson.dumps(payload))
-```
+### 2) `[site]` — branding & feature flags
+Key | What it does | Example
+---|---|---
+`domain` | Public FQDN (for links/branding) | `mesh.local` or leave empty
+`title` | Page title | `"Réseau Mesh UMNG"`
+`message` | Banner text on homepage | Short description of your network
+`nodes`/`conversations`/`everything`/`graphs`/`stats`/`net`/`map`/`top` | Enable/disable UI sections | `True`/`False`
+`map_top_left_lat` / `map_top_left_lon` | Map viewport (NW corner) | Decimal degrees
+`map_bottom_right_lat` / `map_bottom_right_lon` | Map viewport (SE corner) | Decimal degrees
+`weekly_net_message` | Optional weekly net check‑in note | Free text
+`net_tag` | Hashtag used to tag net messages | e.g. `#UMNGMeshNet`
 
-✔️ **Important** : les champs `position`, `rx_time`, `from` et `decoded` sont **nécessaires pour que Meshview comprenne la trame**.
+> **Tip:** Leave all sections `True` to start; tighten later if needed.
 
----
+### 3) `[mqtt]` — **must be correct**
+Key | What it does | Required
+---|---|---
+`server` | **Hostname/IP** of your MQTT broker | **Yes** — in Docker, use the **service name**: `mosquitto` (or your host/IP)
+`port` | Broker port | Usually `1883` (or `8883` for TLS)
+`username` / `password` | Credentials if your broker requires auth | Optional
+`topics` | JSON array of topic filters MeshView subscribes to | **Yes** (e.g. `["msh/CO/cajica/#"]`)
 
-#### 4. **Vérifier la réception des données**
+> In this project the default is `server = mosquitto` and `topics = ["msh/CO/cajica/#"]`. If running everything via `docker-compose` on one network, set `server = mosquitto` so MeshView resolves the broker by service name.
 
-* Dans l'interface **Meshview** sur `http://localhost:8081` :
+### 4) `[database]` — storage backend
+Key | What it does | Default
+---|---|---
+`connection_string` | SQLAlchemy URL for async DB | `sqlite+aiosqlite:///packets.db`
 
-  * Une nouvelle **node** doit apparaître automatiquement.
-  * Clique sur la node pour voir les données reçues (température, humidité...).
+- Keep SQLite for simple setups (data persisted in the container volume if you mount one).
+- For Postgres: `postgresql+asyncpg://user:pass@host:5432/dbname`
 
----
 
-#### 5. **(Optionnel) Intégration avec InfluxDB / Grafana**
 
-Si tu utilises Node-RED pour router les messages vers InfluxDB :
-
-* Abonne-toi au topic `msh/CO/cajica/#` dans Node-RED.
-* Pars les messages MQTT et extrais les champs utiles.
-* Envoie les données dans InfluxDB → Visualise-les dans Grafana.
 
 ---
 
-### 🧪 Exemple de test en local
+## Node-RED flows (how they relate)
 
-Tu peux tester manuellement avec :
+- **MQTT input**: subscribes to `msh/CO/cajica/#` (see `nodered/flows.json`).  
+  The broker node currently points to a LAN IP (`192.168.31.154`). **Change it to `mosquitto`** (service name) or your broker’s host.
+
+- **Parsing**: a Function node converts incoming JSON (e.g. `{temperature, humidity, luminosity_percent, solar_irradiance, solar_class, device}`) into a measurement:
+  ```js
+  msg.payload = [ { temperature, humidity, luminosity_percent, solar_irradiance, solar_class }, { device } ];
+  msg.measurement = "capteurs";
+  ```
+
+- **InfluxDB write**: uses an InfluxDB 2.x config node with `org = "MyOrg"` and `bucket = "LORA"` to persist metrics for Grafana dashboards.
+
+## InfluxDB & Grafana Accounts
+
+### InfluxDB (2.x)
+- Current default credentials (from `.env` file):
+  - **Username**: `admin`
+  - **Password**: `admin123`
+  - **Organization**: `MyOrg`
+  - **Bucket**: `LORA`
+
+- On **first startup with an empty volume**, InfluxDB is bootstrapped using the environment variables defined in `.env` (referenced in `docker-compose.yml`):
+  - `INFLUX_USER`
+  - `INFLUX_PASSWORD`
+  - `INFLUX_ORG`
+  - `INFLUX_BUCKET`
+  - *(optional)* `INFLUX_TOKEN`
+
+- ⚠️ These variables are **only applied once**. If the `./influxdb` folder already contains data, changing them will not update the existing account.
+
+- To apply new credentials:
+  1. Stop the stack:  
+     ```bash
+     docker compose down
+     ```
+  2. Remove the InfluxDB volume or folder (⚠️ data loss):  
+     ```bash
+     rm -rf ./influxdb/*
+     ```
+  3. Relaunch:  
+     ```bash
+     docker compose up -d
+     ```
+
+- If you don’t want to wipe data, you can change the password manually from inside the container:  
+  ```bash
+  docker compose exec influxdb influx user password --name admin
+
+
+
+## Installation & Usage
 
 ```bash
-mosquitto_pub -h localhost -t msh/CO/cajica/meteo01 -m '{"id":"meteo01","from":"meteo01","rx_time":1720000000,"rx_rssi":-60,"rx_snr":7.5,"decoded":{"payload":{"temperature":23.5,"humidity":40}},"position":{"latitude":5.0261,"longitude":-74.0299,"altitude":2550}}'
+# Build MeshView (Dockerfile in repo)
+docker compose build
+
+# Start all services
+docker compose up -d
+
+# Access services
+MeshView:   http://localhost:8081
+Node-RED:   http://localhost:1880
+Grafana:    http://localhost:3000
+InfluxDB:   http://localhost:8086
+Mosquitto:  tcp://localhost:1883
 ```
-
-
-
-
-Exemple de config.ini pour plusieurs capteurs,
-
-# -------------------------
-# Server Configuration
-# -------------------------
-[server]
-bind = *
-port = 8081
-tls_cert =
-acme_challenge =
-
-# -------------------------
-# Site Appearance & Behavior
-# -------------------------
-[site]
-domain =
-title = UMNG Sensor Network
-message = Capteurs déployés autour du campus UMNG à Cajicá, Colombie.
-nodes = True
-conversations = False
-everything = True
-graphs = True
-stats = True
-net = False
-map = True
-top = True
-
-# Centrage carte autour du campus UMNG Cajicá
-map_top_left_lat = 5.02
-map_top_left_lon = -74.04
-map_bottom_right_lat = 4.98
-map_bottom_right_lon = -73.99
-
-# -------------------------
-# MQTT Broker Configuration
-# -------------------------
-[mqtt]
-# Adresse de ton broker local en Docker
-server = mosquitto
-port = 1883
-username =
-password =
-# Topics : un par dispositif
-topics = ["msh/CO/cajica/pico1", "msh/CO/cajica/pico2"]
-
-# -------------------------
-# Database Configuration
-# -------------------------
-[database]
-connection_string = sqlite+aiosqlite:///packets.db
-
-
-
-Les capteurs (code micropython) doivent envoyés deux messages différents au broker MQTT, un servant à la collecte de données pour influxdb et les dashboards et un pour Meshview car ils attendent des formats de messages différents
-Exemple meshview :
-client.publish("msh/CO/cajica/pico1", '{"from": "pico1", "lat": 4.918, "lon": -74.027, "temperature": 24.5, "humidity": 48.0, "light": 310, "batteryLevel": 4.1, "snr": 7.2, "time": "2025-07-12T15:48:38Z"}')
